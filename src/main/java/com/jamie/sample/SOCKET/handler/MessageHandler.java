@@ -20,7 +20,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MessageHandler extends TextWebSocketHandler {
 
     private final static ObjectMapper JSON = new ObjectMapper();
-    private Logger logger = LoggerFactory.getLogger(MessageHandler.class);
     //observers
     private static Map<String, WebSocketSession> users = new ConcurrentHashMap<String, WebSocketSession>();
 
@@ -29,7 +28,7 @@ public class MessageHandler extends TextWebSocketHandler {
      */
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        logger.info(session.getId() + " 연결 됨!!");
+        //logger.info(session.getId() + " 연결 됨!!");
         users.put(session.getId(), session);
     }
 
@@ -43,10 +42,10 @@ public class MessageHandler extends TextWebSocketHandler {
                 message.getPayload(), MESSAGE.class
         ); //MESSAGE에 맵핑
 
-        logger.info(session.getId() + "로부터 json 수신: " + message.getPayload());
+        //logger.info(session.getId() + "로부터 json 수신: " + message.getPayload());
         for (WebSocketSession s : users.values()) {
             s.sendMessage(message);
-            logger.info(s.getId() + "에 json 발송: " + message.getPayload());
+            //logger.info(s.getId() + "에 json 발송: " + message.getPayload());
         }
     }
 
@@ -55,7 +54,7 @@ public class MessageHandler extends TextWebSocketHandler {
      */
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        logger.info(session.getId() + " 연결 종료됨");
+        //logger.info(session.getId() + " 연결 종료됨");
         users.remove(session.getId());
     }
 
@@ -67,7 +66,7 @@ public class MessageHandler extends TextWebSocketHandler {
         TextMessage error = new TextMessage("Throws Exception!!!".getBytes());
         session.sendMessage(error);
 
-        logger.info(session.getId() + " 익셉션 발생: " + exception.getMessage());
+        //logger.info(session.getId() + " 익셉션 발생: " + exception.getMessage());
     }
 
     public static Map<String, WebSocketSession> getUsers() {

@@ -21,7 +21,7 @@ import java.util.Map;
 @RequestMapping("REST")
 public class RESTController {
 
-    private static Logger log = LoggerFactory.getLogger(RESTController.class);
+    //private static Logger log = LoggerFactory.getLogger(RESTController.class);
 
     @RequestMapping(value = "/GET_USER_IP", method = RequestMethod.GET)
     public ResponseEntity<String> GET_USER_IP(HttpServletRequest request) {
