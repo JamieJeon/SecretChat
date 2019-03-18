@@ -12,7 +12,9 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by jeonjaebum on 2018. 1. 4..
@@ -52,5 +54,14 @@ public class RESTController {
             e.printStackTrace();
             return new ResponseEntity<>("Unknown", HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @RequestMapping(value = "/GET_USERS_ID", method = RequestMethod.GET)
+    public ResponseEntity<List<String>> GET_USERS_ID() {
+        Map<String, String> ids =  MessageHandler.getIds();
+
+        List<String> result = ids.values().stream().collect(Collectors.toList());
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

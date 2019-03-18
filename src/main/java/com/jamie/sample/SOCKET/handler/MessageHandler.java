@@ -22,13 +22,13 @@ public class MessageHandler extends TextWebSocketHandler {
     private final static ObjectMapper JSON = new ObjectMapper();
     //observers
     private static Map<String, WebSocketSession> users = new ConcurrentHashMap<String, WebSocketSession>();
+    private static Map<String, String> ids = new ConcurrentHashMap<String, String>();
 
     /**
      * 클라이언트 연결 이후에 실행되는 메소드
      */
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        //logger.info(session.getId() + " 연결 됨!!");
         users.put(session.getId(), session);
     }
 
@@ -42,10 +42,12 @@ public class MessageHandler extends TextWebSocketHandler {
                 message.getPayload(), MESSAGE.class
         ); //MESSAGE에 맵핑
 
-        //logger.info(session.getId() + "로부터 json 수신: " + message.getPayload());
+        if("on".equals(data.getTYPE())){
+            ids.put(session.getId(), data.getID());
+        }
+
         for (WebSocketSession s : users.values()) {
             s.sendMessage(message);
-            //logger.info(s.getId() + "에 json 발송: " + message.getPayload());
         }
     }
 
@@ -54,8 +56,16 @@ public class MessageHandler extends TextWebSocketHandler {
      */
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        //logger.info(session.getId() + " 연결 종료됨");
+
         users.remove(session.getId());
+
+        TextMessage message = new TextMessage("{\"type\":\"off\",\"id\":\""+ids.get(session.getId())+"\",\"message\":\"채팅방에 나가셨습니다.\"}");
+
+        for (WebSocketSession s : users.values()) {
+            s.sendMessage(message);
+        }
+
+        ids.remove(session.getId());
     }
 
     /**
@@ -65,11 +75,13 @@ public class MessageHandler extends TextWebSocketHandler {
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
         TextMessage error = new TextMessage("Throws Exception!!!".getBytes());
         session.sendMessage(error);
-
-        //logger.info(session.getId() + " 익셉션 발생: " + exception.getMessage());
     }
 
     public static Map<String, WebSocketSession> getUsers() {
         return users;
+    }
+
+    public static Map<String, String> getIds() {
+        return ids;
     }
 }

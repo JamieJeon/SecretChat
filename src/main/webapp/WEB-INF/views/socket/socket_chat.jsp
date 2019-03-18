@@ -28,6 +28,15 @@
         input[type=button]{
             margin: 5px;
         }
+
+        #user_list {
+            overflow:scroll;
+            width: 200px;
+            height: 100px;
+            background-color: aliceblue;
+            padding: 5px;
+            margin: 10px;
+        }
     </style>
 </head>
 <body>
@@ -60,25 +69,34 @@
         $(document).ready(function(){
 
             $("#sendWord").on("click", function(){
-                if($("#word").val() == ''){
-                    alert("Input the word!");
-                } else {
-                    message_send('chatting',$("#id").val(),$("#word").val());
+                if($("#word").val() != ''){
+                    message_send('chat',$("#id").val(),$("#word").val());
                 }
             });
 
-            //
             $("#connect").on("click", function(){
                 if($("#id").val() == ''){
                     alert("Input the ID!");
                 } else {
-                    sock = new SockJS(contextPath+"/chat");
-                    sock.onopen = onOpen;
-                    sock.onmessage = onMessage;
-                    sock.onclose = onClose;
+                    var check = true;
+                    $.getJSON(contextPath+'/REST/GET_USERS_ID', function(data){
+                        for(var i=0; i<data.length; i++){
+                            if($("#id").val() == data[i]){
+                                check = false;
+                            }
+                        }
+                        if(check){
+                            sock = new SockJS(contextPath+"/chat");
+                            sock.onopen = onOpen;
+                            sock.onmessage = onMessage;
+                            sock.onclose = onClose;
 
-                    $("#disconn").hide();
-                    $("#conn").show();
+                            $("#disconn").hide();
+                            $("#conn").show();
+                        } else {
+                            alert("이미 로그인한 아이디입니다.");
+                        }
+                    });
                 }
             });
 
@@ -91,12 +109,11 @@
 
             $("#wordList").on("change", function(){
                 console.log('fff');
-
             });
         });
 
         function onOpen(evt) {
-            message_send('chatting',$("#id").val(),"채팅방에 들어오셨습니다.");
+            message_send('on',$("#id").val(),"채팅방에 들어오셨습니다.");
             document.getElementById('word').onfocus = true;
         }
 
@@ -113,13 +130,15 @@
             var message = data.message;
             if(type == 'alert'){
                 alert(message)
+            } else if(type == 'chat') {
+                appendMessage(id+" : "+message);
             } else {
+                refreshId();
                 appendMessage(id+" : "+message);
             }
         }
         //소켓 종료
         function disconnect() {
-            message_send('chatting',$("#id").val(),"채팅방을 나가셨습니다.");
             sock.close();
         }
 
@@ -137,6 +156,15 @@
             $("#wordList").append('<p>' + msg + '</p>');
             var objDiv = document.getElementById("wordList");
             objDiv.scrollTop = objDiv.scrollHeight;
+        }
+
+        function refreshId(){
+            $.getJSON(contextPath+'/REST/GET_USERS_ID', function(data){
+                $("#user_list").html("");
+                for(var i=0; i<data.length; i++){
+                    $("#user_list").append('<p>' + data[i] + '</p>');
+                }
+            });
         }
     </script>
 </body>
