@@ -19,7 +19,7 @@ public class SocketController {
      * chatting
      *
      * */
-    @RequestMapping(value="/socket", method=RequestMethod.GET)
+    @RequestMapping(value="/mqnic", method=RequestMethod.GET)
     public String socket(String test){
 
         return "socket/socket_chat";

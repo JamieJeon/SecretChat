@@ -11,6 +11,46 @@
 <html>
 <head>
     <title>Socket Home</title>
+    <style>
+        #inputWord {
+            float: left;
+            width:30%;
+            height: 100%;
+        }
+
+        #wordList {
+            overflow:scroll;
+            float: left;
+            width: 70%;
+            height: 100%;
+        }
+
+        input[type=button]{
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="inputWord">
+        <h1>
+            Hello Socket!
+        </h1>
+        <h2>Please Input the word!</h2>
+
+        <div id="disconn">
+            <p> ID <input type="text" name="id" id="id" /><input type="button" id="connect" value="Connect"/></p>
+        </div>
+        <div id="conn" style="display: none;">
+            <p> Input <input type="text" name="word" id="word" onkeypress="if( event.keyCode==13 ){document.getElementById('sendWord').click() }"/><input type="button" id="sendWord" value="Send" /></p>
+            <div id="user_list">
+
+            </div>
+        </div>
+    </div>
+
+    <div id="wordList">
+        <h2>List Words</h2>
+    </div>
     <script type="text/javascript" src="${pageContext.request.contextPath}/resources/js/jquery-3.1.0.min.js"></script>
     <script type="text/javascript" src="${pageContext.request.contextPath}/resources/js/socket/sockjs-1.0.3.min.js"></script>
     <script>
@@ -49,23 +89,17 @@
                 $("#disconn").show();
             });
 
+            $("#wordList").on("change", function(){
+                console.log('fff');
+
+            });
         });
 
         function onOpen(evt) {
-            $.ajax({
-                type: "GET",
-                url: "../REST/GET_USER_IP",
-                data: {},
-                dataType: "text",
-                success: function (data) {
-                    $("#id").val($("#id").val() + "(" + data + ")");
-                    message_send('chatting',$("#id").val(),"채팅방에 들어오셨습니다.");
-                },
-                error: function (xhr, status, error) {
-                    console.log(xhr + " " + status + " " + error);
-                }
-            });
+            message_send('chatting',$("#id").val(),"채팅방에 들어오셨습니다.");
+            document.getElementById('word').onfocus = true;
         }
+
         function onClose(evt) {
             //socket이 종료되고 나서 실행됨
             $("#id").val('');
@@ -77,7 +111,6 @@
             var id = data.id;
             var type = data.type;
             var message = data.message;
-            console.log(type);
             if(type == 'alert'){
                 alert(message)
             } else {
@@ -101,28 +134,10 @@
         }
 
         function appendMessage(msg) {
-            $("#wordList").append('<p>'+msg+'</p>');
+            $("#wordList").append('<p>' + msg + '</p>');
+            var objDiv = document.getElementById("wordList");
+            objDiv.scrollTop = objDiv.scrollHeight;
         }
     </script>
-</head>
-<body>
-    <h1>
-        Hello Socket!
-    </h1>
-
-    <div id="inputWord">
-        <h2>Please Input the word!</h2>
-        <div id="disconn">
-            <p>ID <input type="text" name="id" id="id" /><input type="button" id="connect" value="Connect" /></p>
-        </div>
-        <div id="conn" style="display: none;">
-            <p>Input <input type="text" name="word" id="word" /></p>
-            <p><input type="button" id="sendWord" value="Send" /><input type="button" id="disconnect" value="Disconnect" /></p>
-        </div>
-    </div>
-
-    <div id="wordList">
-        <h2>List Words</h2>
-
-    </div>
 </body>
+</html>
