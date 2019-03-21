@@ -4,6 +4,7 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
        xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:beans="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
@@ -11,5 +12,7 @@
 
     <!-- Root Context: defines shared resources visible to all other web components -->
 
-    <context:component-scan base-package="com.jamie.sample" />
+    <beans:bean id="uploadDir" class="java.lang.String">
+        <beans:constructor-arg value="/opt/file"/>
+    </beans:bean>
 </beans>

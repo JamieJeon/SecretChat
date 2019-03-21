@@ -1,17 +1,16 @@
 package com.jamie.sample.SOCKET;
 
 import com.jamie.sample.SOCKET.handler.MessageHandler;
-import com.jamie.sample.SOCKET.model.Test;
-import com.jamie.sample.UTIL.GetUserInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.jamie.sample.SOCKET.model.ResponseOverlays;
+import com.jamie.sample.UTIL.FileUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -23,38 +22,10 @@ import java.util.stream.Collectors;
 @RequestMapping("REST")
 public class RESTController {
 
+    @Inject
+    String uploadDir;
+
     //private static Logger log = LoggerFactory.getLogger(RESTController.class);
-
-    @RequestMapping(value = "/GET_USER_IP", method = RequestMethod.GET)
-    public ResponseEntity<String> GET_USER_IP(HttpServletRequest request) {
-        try {
-            String ip = GetUserInfo.getIp(request);
-            return new ResponseEntity<>(ip, HttpStatus.OK);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseEntity<>("Unknown", HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @RequestMapping(value = "/SEND_MESSAGE", method = RequestMethod.POST)
-    public ResponseEntity<String> SEND_MESSAGE(HttpServletRequest request, @RequestBody Test t) {
-        try {
-            TextMessage message = new TextMessage("{\"type\":\""+t.getType()+"\",\"id\":\"admin(0:0:0:0:0:0:0:1)\",\"message\":\""+t.getMsg()+"\"}");
-
-            Map<String, WebSocketSession> users =  MessageHandler.getUsers();
-
-            WebSocketSession s = users.get(t.getId());
-
-            if(s != null){
-                s.sendMessage(message);
-            }
-
-            return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseEntity<>("Unknown", HttpStatus.BAD_REQUEST);
-        }
-    }
 
     @RequestMapping(value = "/GET_USERS_ID", method = RequestMethod.GET)
     public ResponseEntity<List<String>> GET_USERS_ID() {
@@ -63,5 +34,16 @@ public class RESTController {
         List<String> result = ids.values().stream().collect(Collectors.toList());
 
         return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/IMAGE_SEND", method = RequestMethod.POST)
+    public ResponseOverlays<String> IMAGE_SEND(MultipartFile file, String id) {
+        String result = "";
+        try {
+            result = FileUtils.upload(uploadDir,id+"_"+file.getOriginalFilename(),file.getBytes());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new ResponseOverlays<>(200,null,result);
     }
 }

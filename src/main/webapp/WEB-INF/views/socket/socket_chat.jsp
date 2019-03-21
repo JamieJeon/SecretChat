@@ -32,10 +32,15 @@
         #user_list {
             overflow:scroll;
             width: 200px;
-            height: 100px;
+            height: 300px;
             background-color: aliceblue;
             padding: 5px;
             margin: 10px;
+        }
+
+        .file_send_image {
+            width: 100px;
+            height: 100px;
         }
     </style>
 </head>
@@ -51,6 +56,7 @@
         </div>
         <div id="conn" style="display: none;">
             <p> Input <input type="text" name="word" id="word" onkeypress="if( event.keyCode==13 ){document.getElementById('sendWord').click() }"/><input type="button" id="sendWord" value="Send" /></p>
+            <p><form id="fileForm" method="POST" enctype="multipart/form-data"><input type="file" name="file" id="file"/><input type="button" id="fileSend" value="Image Send" /></form></p>
             <div id="user_list">
 
             </div>
@@ -71,6 +77,31 @@
             $("#sendWord").on("click", function(){
                 if($("#word").val() != ''){
                     message_send('chat',$("#id").val(),$("#word").val());
+                }
+            });
+
+            $("#fileSend").on("click", function(){
+                if($("#file").val != ''){
+                    var data = new FormData(document.getElementById('fileForm'));
+                    data.append('id', $("#id").val());
+
+                    $.ajax({
+                        url: contextPath + "/REST/IMAGE_SEND",
+                        processData: false,  // file전송시 필수
+                        contentType: false,  // file전송시 필수
+                        data: data,
+                        type: "POST",
+                        dataType: "json"
+                    }).done(function(json) {
+                        var fileName = json.BODY;
+                        message_send('img',$("#id").val(),fileName);
+                        document.getElementById("fileForm").reset();
+                    }).fail(function(xhr, status, errorThrown) {
+                        console.log("오류명: " + errorThrown);
+                        console.log("상태: " + status);
+                    }).always(function(xhr, status) {
+                        console.log("done")
+                    });
                 }
             });
 
@@ -132,7 +163,9 @@
                 alert(message)
             } else if(type == 'chat') {
                 appendMessage(id+" : "+message);
-            } else {
+            } else if(type == 'img'){
+                appendImage(id, message);
+            } else{ //on, off경우
                 refreshId();
                 appendMessage(id+" : "+message);
             }
@@ -156,6 +189,14 @@
             $("#wordList").append('<p>' + msg + '</p>');
             var objDiv = document.getElementById("wordList");
             objDiv.scrollTop = objDiv.scrollHeight;
+        }
+
+        function appendImage(id, fileName) {
+            if(fileName != ''){
+                $("#wordList").append('<p>' + id + ' : <img src=/file' + fileName + ' class="file_send_image"/></p>');
+                var objDiv = document.getElementById("wordList");
+                objDiv.scrollTop = objDiv.scrollHeight;
+            }
         }
 
         function refreshId(){
