@@ -81,7 +81,7 @@
             });
 
             $("#fileSend").on("click", function(){
-                if($("#file").val != ''){
+                if($("#file").val() != ''){
                     var data = new FormData(document.getElementById('fileForm'));
                     data.append('id', $("#id").val());
 
